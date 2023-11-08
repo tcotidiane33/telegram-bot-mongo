@@ -1,0 +1,28 @@
+{
+  "name": "telegram-bot-mongodb",
+  "version": "1.0.0",
+  "description": "bot telegram mongodb RealTime ",
+  "main": "playground-1.mongodb.js",
+  "scripts": {
+    "start": "nodemon app.js",
+    "test": "nodemon script.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tcotidiane33/telegram-bot-mongo.git"
+  },
+  "author": "tcotidiane",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tcotidiane33/telegram-bot-mongo/issues"
+  },
+  "homepage": "https://github.com/tcotidiane33/telegram-bot-mongo#readme",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "mongodb": "^6.2.0",
+    "telegraf": "^3.40.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
