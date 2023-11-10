@@ -19,6 +19,7 @@
   "homepage": "https://github.com/tcotidiane33/telegram-bot-mongo#readme",
   "dependencies": {
     "dotenv": "^16.3.1",
+    "ejs": "^3.1.9",
     "mongodb": "^6.2.0",
     "telegraf": "^3.40.0"
   },
