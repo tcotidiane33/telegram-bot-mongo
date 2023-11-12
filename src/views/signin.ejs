@@ -1,0 +1,32 @@
+<!-- signin.ejs -->
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Se connecter</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-/1aEKdR82gA2LObVya7oJDS4g+uJ8HxL4iGiUEyZz0Xn1+BWp5/4w/DPVqcGSlRxf58nUC9i4f+WG5G0xW3P8g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" type="text/css" href="../plubic/style.css">
+    <script src="../script.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Se connecter</h1>
+    </header>
+
+    <div class="container">
+        <form action="/signin" method="post">
+            <label for="email">Email :</label>
+            <input type="email" name="email" required><br>
+            <label for="password">Mot de passe :</label>
+            <input type="password" name="password" required><br>
+            <input type="submit" value="Se connecter">
+        </form>
+    </div>
+
+    <!-- Pied de page -->
+    <footer>
+        <p>© 2023 Votre Nom</p>
+    </footer>
+</body>
+</html>

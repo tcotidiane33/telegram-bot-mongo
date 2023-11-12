@@ -1,0 +1,58 @@
+<!-- dashboard.ejs -->
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Tableau de Bord</title>
+    <link rel="stylesheet" type="text/css" href="../plubic/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" integrity="sha512-xr0BdjG7ZKW2lOSIMYzvMjLrfQjfwxKkSYBbXib5gB70u6bPxqjOp+sU9RDaA/2MYqHhG8YlCVRG8DRxj/6EaA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="../script.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Tableau de Bord</h1>
+    </header>
+
+    <div class="container">
+        <h2>Liste des Collections</h2>
+        <ul>
+            <% collections.forEach(collection => { %>
+                <li>
+                    <h3><%= collection.name %></h3>
+                    <p><i class="fas fa-box"></i> Disponibilité des stocks: <%= getStockAvailability(collection.name) %></p>
+                    <form action="/dashboard/update" method="post">
+                        <input type="hidden" name="collection" value="<%= collection.name %>">
+                        <button type="submit"><i class="fas fa-pencil-alt"></i> Mettre à Jour</button>
+                    </form>
+                    <form action="/dashboard/delete" method="post">
+                        <input type="hidden" name="collection" value="<%= collection.name %>">
+                        <button type="submit"><i class="fas fa-trash-alt"></i> Supprimer</button>
+                    </form>
+                </li>
+            <% }); %>
+        </ul>
+    </div>
+
+    <!-- Pied de page -->
+    <footer>
+        <p>© 2023 Votre Nom</p>
+    </footer>
+
+    <script>
+            // Modèle de la collection carts
+        const Cart = mongoose.model('carts');
+
+        // Définissez la fonction getStockAvailability
+        function getStockAvailability(collectionName) {
+            // Utilisez le modèle de la collection carts
+            return Cart.countDocuments({})
+                .then(count => `Stock disponible: ${count} unités`)
+                .catch(error => {
+                    console.error(`Erreur lors de la récupération de la disponibilité des stocks pour la collection ${collectionName}: ${error.message}`);
+                    return 'Erreur de récupération des stocks';
+                });
+        }
+    </script>
+</body>
+</html>
