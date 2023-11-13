@@ -8,6 +8,29 @@
     <link rel="stylesheet" type="text/css" href="../plubic/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" integrity="sha512-xr0BdjG7ZKW2lOSIMYzvMjLrfQjfwxKkSYBbXib5gB70u6bPxqjOp+sU9RDaA/2MYqHhG8YlCVRG8DRxj/6EaA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="../script.js"></script>
+  
+    <!-- ... (autres balises head) ... -->
+    <script>
+        // Assurez-vous que la fonction getStockAvailability est correctement définie
+        function getStockAvailability(collectionName) {
+            const Cart = mongoose.model('carts'); // Assurez-vous que le modèle de la collection carts est correctement défini
+
+            return Cart.aggregate([
+                { $group: { _id: null, totalStock: { $sum: "$stock" } } }
+            ])
+            .then(result => {
+                if (result.length > 0) {
+                    return `Stock total disponible: ${result[0].totalStock} unités`;
+                } else {
+                    return 'Aucun stock disponible';
+                }
+            })
+            .catch(error => {
+                console.error(`Erreur lors de la récupération de la disponibilité des stocks pour la collection ${collectionName}: ${error.message}`);
+                return 'Erreur de récupération des stocks';
+            });
+        }
+    </script>
 </head>
 <body>
     <header>
@@ -39,20 +62,6 @@
         <p>© 2023 Votre Nom</p>
     </footer>
 
-    <script>
-            // Modèle de la collection carts
-        const Cart = mongoose.model('carts');
 
-        // Définissez la fonction getStockAvailability
-        function getStockAvailability(collectionName) {
-            // Utilisez le modèle de la collection carts
-            return Cart.countDocuments({})
-                .then(count => `Stock disponible: ${count} unités`)
-                .catch(error => {
-                    console.error(`Erreur lors de la récupération de la disponibilité des stocks pour la collection ${collectionName}: ${error.message}`);
-                    return 'Erreur de récupération des stocks';
-                });
-        }
-    </script>
 </body>
 </html>

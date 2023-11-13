@@ -4,7 +4,7 @@
   "description": "bot telegram mongodb RealTime ",
   "main": "playground-1.mongodb.js",
   "scripts": {
-    "start": "node dist/script.js",
+    "start": "node src/script.js",
     "test": "nodemon script.js"
   },
   "repository": {
