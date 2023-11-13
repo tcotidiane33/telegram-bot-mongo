@@ -5,6 +5,7 @@ const { MongoClient } = require('mongodb');
 
 const botToken = process.env.BOT_TOKEN; // Récupérer le token du bot depuis les variables d'environnement
 const mongoURI = process.env.MONGO_URI; // Récupérer l'URI MongoDB depuis les variables d'environnement
+const dbName = process.env.MONGO_DB;
 
 const express = require('express');
 const app = express();
@@ -12,10 +13,20 @@ const port = 3000;
 const bodyParser = require('body-parser');
 
 // Initialisez le bot Telegram
-const bot = new Telegraf(process.env.BOT_TOKEN);
+const bot = new Telegraf(botToken);
 bot.use(session());
+const connectToMongoDB = async () => {
+    const client = new MongoClient(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true });
+    await client.connect();
+    return client.db(dbName);
+};
+const getCollections = async () => {
+    const db = await connectToMongoDB();
+    return db.listCollections().toArray();
+};
 
-MongoClient.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+
+MongoClient.connect(mongoURI, { useUnifiedTopology: true })
     .then((client) => {
         console.log('Connected to MongoDB successfully');
         const db = client.db();
@@ -24,8 +35,13 @@ MongoClient.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true 
         const collections = db.listCollections().toArray();
 
         bot.start((ctx) => {
-            ctx.reply('Welcome to the Telegram bot! \n Commands:lorsque l\'utilisateur envoie la commande /addDocument, le bot commencera à collecter les informations requises sous forme de texte. Les utilisateurs devront envoyer les informations séparées par des sauts de ligne (une information par ligne, dans l\'ordre : email, number, firstName, lastName). Une fois que toutes les informations sont collectées, le bot les insérera dans la collection *novohub* de la base de données *novo* \b -Pour accéder à la collection "novohub" de la base de données "novo" lorsque l\'utilisateur envoie la commande /accessCollection  \b   lorsque tu exécutes la commande /dbstats, le bot enverra les statistiques pour la base de données *novo* et les collections *novohub* et *carts*.');
+            ctx.reply(`Welcome to the Telegram bot! \n
+                Commands:
+                - To start collecting information, use the command /addDocument. The bot will prompt you to send the required information as separate lines (email, number, firstName, lastName). Once all information is collected, the bot will insert it into the 'login' collection of the 'novo' database.
+                - To access the 'login' collection of the 'novo' database, use the command /accessCollection.
+                - To get database statistics, use the command /dbstats. The bot will provide statistics for the 'novo' database and the 'login' collection.`);
         });
+        
 
         bot.help((ctx) => {
             ctx.reply('This bot is associated with a MongoDB NoSQL database.');
@@ -86,20 +102,38 @@ MongoClient.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true 
             }
         });
         bot.command('accessCollection', async (ctx) => {
-        try {
-            const novoDb = client.db('novo'); // Accède à la base de données 'novo'
-            const collection = novoDb.collection('novohub'); // Accède à la collection "novohub"
-
-            // Ici, tu peux effectuer des opérations sur la collection, par exemple, récupérer des documents, les mettre à jour, etc.
-            const documents = await collection.find({}).toArray();
-
-            const response = `Documents in 'novohub' collection:\n${JSON.stringify(documents, null, 2)}`;
-            ctx.reply(response);
-        } catch (err) {
-                console.error('Failed to access the collection:', err);
-                ctx.reply('Failed to access the collection. Please try again later.');
+            const collectionName = ctx.message.text.split(' ')[1];
+            
+            try {
+                const db = await connectToMongoDB();
+                const collection = db.collection(collectionName);
+                const documents = await collection.find({}).toArray();
+                const response = `Documents in '${collectionName}' collection:\n${JSON.stringify(documents, null, 2)}`;
+                ctx.reply(response);
+            } catch (err) {
+                console.error(`Failed to access the collection '${collectionName}':`, err);
+                ctx.reply(`Failed to access the collection '${collectionName}'. Please try again later.`);
             }
         });
+        // ...
+
+        bot.command('accessCarts', async (ctx) => {
+            try {
+                const novoDb = client.db('novo');
+                const collection = novoDb.collection('carts');
+
+                const documents = await collection.find({}).toArray();
+
+                const response = `Documents in 'carts' collection:\n${JSON.stringify(documents, null, 2)}`;
+                ctx.reply(response);
+            } catch (err) {
+                console.error('Failed to access the collection "carts":', err);
+                ctx.reply('Failed to access the collection "carts". Please try again later.');
+            }
+        });
+
+        // ...
+
         bot.command('addDocument', (ctx) => {
             ctx.reply('Please enter the following information:');
             ctx.session.state = 'collectingInfo'; // Garder une trace de l'état actuel de la conversation
@@ -109,7 +143,7 @@ MongoClient.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true 
             if (ctx.session.state === 'collectingInfo') {
                 try {
                     const novoDb = client.db('novo'); // Accéder à la base de données 'novo'
-                    const collection = novoDb.collection('novohub'); // Accéder à la collection "novohub"
+                    const collection = novoDb.collection('login'); // Accéder à la collection "novohub"
 
                     // Extraire les informations saisies par l'utilisateur depuis le message
                     const userInput = ctx.message.text.split('\n');
@@ -137,25 +171,24 @@ MongoClient.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true 
         app.get('/', (req, res) => {
             res.send(`
                 <form action="/save" method="post">
-                    Email: <input type="text" name="email"><br>
-                    Number: <input type="number" name="number"><br>
-                    First Name: <input type="text" name="firstName"><br>
-                    Last Name: <input type="text" name="lastName"><br>
+                    First Name: <input type="text" name="firstName" required><br>
+                    Last Name: <input type="text" name="lastName" required><br>
+                    Number: <input type="number" name="number" required><br>
+                    Email: <input type="email" name="email" required><br>
+                    Password: <input type="password" name="password" required><br>
                     <input type="submit" value="Submit">
                 </form>
             `);
         });
+        
         // Endpoint pour gérer l'enregistrement des données
-        app.post('/save', async (req, res) => {
-            const { email, number, firstName, lastName } = req.body;
+        app.post('/save', bodyParser.urlencoded({ extended: false }), async (req, res) => {
+            const { email, number, firstName, lastName, password } = req.body;
             
-            // Insérer les données dans la collection MongoDB
-            const client = new MongoClient(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true });
             try {
-                await client.connect();
-                const novoDb = client.db('novo');
-                const collection = novoDb.collection('novohub');
-                await collection.insertOne({ email, number: parseInt(number), firstName, lastName });
+                const db = await connectToMongoDB();
+                const collection = db.collection('login');
+                await collection.insertOne({ email, number: parseInt(number), firstName, lastName, password });
                 res.send('Data saved successfully');
             } catch (err) {
                 console.error('Failed to save data:', err);
@@ -164,6 +197,7 @@ MongoClient.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true 
                 client.close();
             }
         });
+
 
         app.listen(port, () => {
             console.log(`Server is listening at http://localhost:${port}`);
