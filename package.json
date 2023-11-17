@@ -4,8 +4,8 @@
   "description": "bot telegram mongodb RealTime ",
   "main": "playground-1.mongodb.js",
   "scripts": {
-   
-    "start": "nodemon script.js"
+    "start": "nodemon script.js",
+    "test": "node app.js"
   },
   "repository": {
     "type": "git",
@@ -26,12 +26,14 @@
     "express": "^4.18.2",
     "mongodb": "^6.2.0",
     "mongoose": "^8.0.0",
+    "node-telegram-bot-api": "^0.64.0",
     "react": "^18.2.0",
     "react-bootstrap": "^2.9.1",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.18.0",
     "react-scripts": "^5.0.1",
-    "telegraf": "^3.40.0"
+    "react-telegram-login": "^1.1.2",
+    "telegraf": "^4.15.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
