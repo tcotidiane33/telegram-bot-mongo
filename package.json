@@ -33,7 +33,7 @@
     "react-router-dom": "^6.18.0",
     "react-scripts": "^5.0.1",
     "react-telegram-login": "^1.1.2",
-    "telegraf": "^4.15.0"
+    "telegraf": "^4.16.3"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
