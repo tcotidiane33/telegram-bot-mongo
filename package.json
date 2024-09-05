@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/tcotidiane33/telegram-bot-mongo#readme",
   "dependencies": {
-    "axios": "^1.6.1",
+    "axios": "^1.6.8",
     "body-parser": "^1.20.2",
     "bootstrap": "^5.3.2",
     "dotenv": "^16.3.1",
